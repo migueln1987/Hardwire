@@ -51,17 +51,10 @@ class MetronomeViewModel : ViewModel() {
 
     fun startMetronome() {
         viewModelScope.launch {
-            println("TRACE: 1. Start button clicked")
             try {
-                println("TRACE: 2. Attempting to read bytes...")
                 val audioBytes = Res.readBytes("files/tik.wav")
-                println("TRACE: 3. Successfully read ${audioBytes.size} bytes")
-
                 engine.setAudioData(audioBytes)
-                println("TRACE: 4. Data sent to engine")
-
                 engine.start()
-                println("TRACE: 5. Engine.start() called")
             } catch (e: Exception) {
                 println("TRACE: ERROR - ${e.message}")
                 e.printStackTrace()

@@ -47,7 +47,10 @@ fun MetronomeScreen(initialBpm: Int = 120, viewModel: MetronomeViewModel = viewM
 
         Slider(
             value = bpm.toFloat(),
-            onValueChange = { bpm = it.toInt() },
+            onValueChange = {
+                bpm = it.toInt()
+                viewModel.updateBpm(bpm)
+            },
             valueRange = 40f..220f
         )
 
@@ -60,14 +63,14 @@ fun MetronomeScreen(initialBpm: Int = 120, viewModel: MetronomeViewModel = viewM
                 containerColor = if (isRunning) Color.Red else Color.Green
             )
         ) {
-            Text(text =if (isRunning) "Stop" else "Start")
+            Text(text = if (isRunning) "Stop" else "Start")
         }
     }
 }
 
 @Composable
 fun MetronomeVisualizer(viewModel: MetronomeViewModel) {
-    var isVisible by remember { mutableStateOf(false)}
+    var isVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.ticketEvent.collect {
