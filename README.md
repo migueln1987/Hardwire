@@ -33,3 +33,11 @@ in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and r
 ---
 
 Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+
+Tick Sound: Originally titled "Perc_MetronomeQuarts_hi" by []. Sourced from []. Licensed under [CC BY 4.0]. File renamed to tick.wav for project use.
+
+### Attributions
+* **"tick.wav"** (originally *Perc_MetronomeQuarts_hi*)
+  - **Author:** [u/errorjones](https://old.reddit.com/user/errorjones)
+  - **Source:** Found on [r/audioengineering](https://old.reddit.com/r/audioengineering/comments/kg8gth/free_click_track_sound_archive)
+  - **License:** Provided as a free resource by the author on Reddit.
