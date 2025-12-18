@@ -28,7 +28,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tacosforchessur.hardwire.viewmodel.MetronomeViewModel
 import kotlinx.coroutines.delay
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun MetronomeScreen(initialBpm: Int = 120, viewModel: MetronomeViewModel = viewModel()) {
