@@ -27,8 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tacosforchessur.hardwire.viewmodel.MetronomeViewModel
 import kotlinx.coroutines.delay
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable

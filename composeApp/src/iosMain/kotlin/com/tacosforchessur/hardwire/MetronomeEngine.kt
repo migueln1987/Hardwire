@@ -2,7 +2,6 @@ package com.tacosforchessur.hardwire
 
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.Pinned
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import kotlinx.coroutines.CoroutineScope
@@ -15,11 +14,8 @@ import platform.AVFAudio.AVAudioPlayer
 import platform.AVFAudio.AVAudioSession
 import platform.AVFAudio.AVAudioSessionCategoryPlayback
 import platform.AVFAudio.setActive
-import platform.Foundation.NSBundle
 import platform.Foundation.NSData
 import platform.Foundation.create
-import platform.Foundation.NSTimer
-import platform.Foundation.NSURL
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
