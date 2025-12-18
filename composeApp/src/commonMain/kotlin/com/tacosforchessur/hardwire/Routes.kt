@@ -7,3 +7,6 @@ object HomeRoute
 
 @Serializable
 data class MetronomeRoute(val initialBpm: Int = 120)
+
+@Serializable
+object ChordChangerRoute

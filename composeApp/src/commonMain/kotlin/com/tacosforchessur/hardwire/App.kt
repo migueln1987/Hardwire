@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.tacosforchessur.hardwire.ui.ChordChangerScreen
 import com.tacosforchessur.hardwire.ui.HomeScreen
 import com.tacosforchessur.hardwire.ui.MetronomeScreen
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -23,7 +24,10 @@ fun App() {
             composable<HomeRoute> {
                 HomeScreen(onNavigateToMetronome = { bpm ->
                     navController.navigate(MetronomeRoute(bpm))
-                })
+                },
+                    onNavigateToChordChanger = {
+                        navController.navigate(route = ChordChangerRoute)
+                    })
             }
 
             composable<MetronomeRoute> { backStackEntry ->
@@ -31,6 +35,10 @@ fun App() {
                 MetronomeScreen(
                     initialBpm = route.initialBpm
                 )
+            }
+
+            composable<ChordChangerRoute> {
+                ChordChangerScreen()
             }
         }
     }
