@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -50,6 +51,7 @@ fun ChordChangerScreenPreview() {
 
 const val STRINGS = 6
 const val FRETS = 5
+
 @Composable
 fun ChordDiagram(
     chord: Chord = ChordLibrary.A_Major,
@@ -76,7 +78,7 @@ fun ChordDiagram(
                 val stringNum = i + 1
                 Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                     val isMuted = stringNum in chord.mutedString
-                    val isOpen = !chord.fingers.any{ it.string == stringNum}
+                    val isOpen = !chord.fingers.any { it.string == stringNum }
                     if (isMuted) Text(text = "x") else if (isOpen) Text(text = "o")
                 }
             }
@@ -90,37 +92,38 @@ fun ChordDiagram(
                     val fretBoardCenter = size.width / 2f
                     val columnWith = size.width / STRINGS
                     drawFretboard(fretSpacing, baseFret)
-
-                    inlays.forEach { inlayFret ->
-                        val rowIndex = inlayFret - baseFret
-                        if (rowIndex in 0 until FRETS) {
-                            val y = (rowIndex * fretSpacing) + (fretSpacing / 2f)
-                            if (inlayFret == 12) {
-                                drawCircle(Color.Black, 6f, Offset(fretBoardCenter - columnWith, y))
-                                drawCircle(Color.Black, 6f, Offset(fretBoardCenter + columnWith, y))
-                            } else {
-                                drawCircle(Color.Black, 6f, Offset(fretBoardCenter, y))
-                            }
-                        }
-                    }
-
-                }
-        ) {
+                    drawInlays(
+                        inlays = inlays,
+                        baseFret = baseFret,
+                        fretSpacing = fretSpacing,
+                        fretBoardCenter = fretBoardCenter,
+                        columnWith = columnWith
+                    )
+                }) {
             Column(modifier = Modifier.fillMaxSize()) {
                 repeat(FRETS) { rowIndex ->
                     val currentFret = baseFret + rowIndex
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        if (baseFret > 1) {
+                            Text(
+                                text = "${baseFret + rowIndex}",
+                                fontSize = 12.sp,
+                                color = Color.Gray,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                     Row(modifier = Modifier.weight(1f)) {
                         repeat(STRINGS) { colIndex ->
                             val stringNum = colIndex + 1
                             val finger = chord.fingers.find { it.string == stringNum && it.fret == currentFret }
-                            println("Finger: $finger")
                             BoxWithConstraints(
                                 modifier = Modifier.weight(1f).fillMaxHeight(),
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (finger != null) {
                                     val displayLabel = if (finger.label.isNullOrEmpty()) {
-                                        if(finger.fret > 0) finger.fret.toString() else ""
+                                        if (finger.fret > 0) finger.fret.toString() else ""
                                     } else {
                                         finger.label
                                     }
@@ -157,26 +160,36 @@ fun DrawScope.drawFretboard(fretSpacing: Float, baseFret: Int) {
 
     for (i in 0..FRETS) {
         val y = i * fretSpacing
-        val isNut = (i == 0 && baseFret == 1)
+        val isGuitarNut = (i == 0 && baseFret == 1)
+        val stroke = if (isGuitarNut) 10f else 2f
         drawLine(
             color = Color.Black,
             start = Offset(halfColumn, y),
             end = Offset(lastStringX, y),
-            strokeWidth = if (isNut) 10f else 2f
+            strokeWidth = stroke
         )
     }
 }
 
-@Composable
-fun InlayDot(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .size(12.dp)
-            .background(
-                color = Color.LightGray.copy(alpha = 0.5f),
-                shape = CircleShape
-            )
-    )
+fun DrawScope.drawInlays(
+    inlays: List<Int>,
+    baseFret: Int,
+    fretSpacing: Float,
+    fretBoardCenter: Float,
+    columnWith: Float
+) {
+    inlays.forEach { inlayFret ->
+        val rowIndex = inlayFret - baseFret
+        if (rowIndex in 0 until FRETS) {
+            val y = (rowIndex * fretSpacing) + (fretSpacing / 2f)
+            if (inlayFret == 12) {
+                drawCircle(Color.Black, 6f, Offset(fretBoardCenter - columnWith, y))
+                drawCircle(Color.Black, 6f, Offset(fretBoardCenter + columnWith, y))
+            } else {
+                drawCircle(Color.Black, 6f, Offset(fretBoardCenter, y))
+            }
+        }
+    }
 }
 
 @Composable
@@ -194,7 +207,7 @@ fun FingerMarker(
         val fontSize = with(LocalDensity.current) {
             (size.toPx() * 0.5f).toSp()
         }
-        if(label.isNotEmpty()) {
+        if (label.isNotEmpty()) {
             Text(
                 text = label,
                 color = Color.White,
