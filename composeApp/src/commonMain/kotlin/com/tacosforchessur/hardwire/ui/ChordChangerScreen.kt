@@ -86,7 +86,6 @@ fun ChordDiagram(
                 .fillMaxSize()
                 .weight(1f)
                 .drawBehind {
-                    val stringSpacing = size.width / (STRINGS - 1)
                     val fretSpacing = size.height / FRETS
                     val fretBoardCenter = size.width / 2f
                     val columnWith = size.width / STRINGS
