@@ -1,5 +1,8 @@
 package com.tacosforchessur.hardwire.viewmodel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tacosforchessur.hardwire.MetronomeEngine
@@ -14,7 +17,7 @@ class MetronomeViewModel : ViewModel() {
 
     private val engine = MetronomeEngine()
 
-    private val _tickEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    private val _tickEvent = MutableSharedFlow<Int>(extraBufferCapacity = 1)
     val ticketEvent = _tickEvent.asSharedFlow()
 
     private val _bpm = MutableStateFlow(120)
@@ -23,9 +26,15 @@ class MetronomeViewModel : ViewModel() {
     private val _isTicking = MutableStateFlow(false)
     val isTicking = _isTicking.asStateFlow()
 
+    var currentBeat by mutableStateOf(1)
+    var beatsPerMeasure = 4 //TODO: Make this adjustable
+
     init {
         engine.onTick = {
-            _tickEvent.tryEmit(Unit)
+            val isAccent = (currentBeat == 1)
+            engine.playTick(isAccent)
+            currentBeat = if (currentBeat >= beatsPerMeasure) 1 else currentBeat + 1
+            _tickEvent.tryEmit(currentBeat)
         }
     }
 

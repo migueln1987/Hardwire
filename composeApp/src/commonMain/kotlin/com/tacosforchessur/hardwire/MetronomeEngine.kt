@@ -8,5 +8,8 @@ expect class MetronomeEngine() {
     fun start()
     fun stop()
     fun setBpm(bpm: Int)
+
     fun isPlaying(): Boolean
+
+    fun playTick(isAccent: Boolean)
 }

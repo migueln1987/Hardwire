@@ -1,6 +1,9 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.tacosforchessur.hardwire.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -12,10 +15,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -28,25 +38,64 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import com.tacosforchessur.hardwire.viewmodel.ChordChangerViewModel
+import com.tacosforchessur.hardwire.viewmodel.MetronomeViewModel
 
 @Composable
-fun ChordChangerScreen() {
-    Scaffold {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-            Box(modifier = Modifier.fillMaxHeight(0.5f).padding(16.dp), contentAlignment = Alignment.Center) {
-                ChordDiagram()
-            }
-            Box(modifier = Modifier.fillMaxHeight(0.5f).padding(16.dp), contentAlignment = Alignment.Center) {
-                Text("Control Panel")
+fun ChordChangerScreen(
+    metronomeVm: MetronomeViewModel,
+    chordVm: ChordChangerViewModel,
+    onNavigateToMetronome: (Int) -> Unit
+) {
+    val currentBeat = metronomeVm.currentBeat
+    val isTicking by metronomeVm.isTicking.collectAsState()
+
+    LaunchedEffect(Unit) {
+        metronomeVm.ticketEvent.collect { beat ->
+            if (beat == 1) {
+                chordVm.pickNextChord()
             }
         }
     }
-}
 
-@Composable
-@Preview
-fun ChordChangerScreenPreview() {
-    ChordChangerScreen()
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text =  "Chord Practice") },
+                actions = {
+                    IconButton(onClick = {metronomeVm.toggleMetronome() }) {
+                        Text(if (isTicking) "⏸" else "▶")
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp)) {
+            Column(modifier = Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = currentBeat.toString(),
+                    style = MaterialTheme.typography.displayLarge,
+                    color = if (currentBeat == 1) Color.Red else Color.Green
+                )
+                chordVm.currentChord?.let { chord ->
+                    println("chord: $chord")
+                    ChordDiagram(chord = chord, baseFret = 1)
+                }
+            }
+            Column(
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Bottom
+            ) {
+                OutlinedButton(
+                    onClick = { onNavigateToMetronome(metronomeVm.bpm.value) },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                ) {
+                    Text("Adjust Metronome & BPM")
+                }
+            }
+        }
+    }
 }
 
 const val STRINGS = 6
@@ -276,4 +325,6 @@ object ChordLibrary {
         ),
         mutedString = listOf(1)
     )
+
+    val allChords = listOf(G_Major, C_Major, A_Major)
 }

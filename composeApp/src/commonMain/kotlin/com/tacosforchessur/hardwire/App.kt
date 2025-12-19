@@ -9,11 +9,15 @@ import androidx.navigation.toRoute
 import com.tacosforchessur.hardwire.ui.ChordChangerScreen
 import com.tacosforchessur.hardwire.ui.HomeScreen
 import com.tacosforchessur.hardwire.ui.MetronomeScreen
+import com.tacosforchessur.hardwire.viewmodel.ChordChangerViewModel
+import com.tacosforchessur.hardwire.viewmodel.MetronomeViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
 fun App() {
+    val metronomeVm = remember { MetronomeViewModel() }
+    val chordVm = remember { ChordChangerViewModel() }
     MaterialTheme {
         val navController = rememberNavController()
 
@@ -33,12 +37,19 @@ fun App() {
             composable<MetronomeRoute> { backStackEntry ->
                 val route: MetronomeRoute = backStackEntry.toRoute()
                 MetronomeScreen(
-                    initialBpm = route.initialBpm
+                    initialBpm = route.initialBpm,
+                    viewModel = metronomeVm
                 )
             }
 
             composable<ChordChangerRoute> {
-                ChordChangerScreen()
+                ChordChangerScreen(
+                    metronomeVm = metronomeVm,
+                    chordVm = chordVm,
+                    onNavigateToMetronome = { bpm ->
+                        navController.navigate(MetronomeRoute(bpm))
+                    }
+                )
             }
         }
     }

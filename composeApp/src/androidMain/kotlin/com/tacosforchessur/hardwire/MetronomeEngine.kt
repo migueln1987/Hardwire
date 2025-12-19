@@ -41,30 +41,11 @@ actual class MetronomeEngine actual constructor() {
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     actual fun start() {
-        if (isRunning.compareAndExchange(expectedValue = false, newValue = true)) return
+        if (!isRunning.compareAndSet(expectedValue = false, newValue = true)) return
         job = scope.launch {
             while (isRunning.load()) {
                 val interval = 60000L / bpm
                 onTick?.invoke()
-                toneGen.startTone(android.media.ToneGenerator.TONE_PROP_BEEP, 50)
-                // TODO: debug soundPool
-//                if (soundId != 0) {
-//                    val streamId =
-//                    soundPool.play(soundId, 1f, 1f, 1, 0, 1f)
-//
-//                    if (streamId == 0) {
-//                        println("DEBUG: SoundPool failed! (Return code 0)")
-//                    } else {
-//                        println("DEBUG: SoundPool reports SUCCESS playing stream: $streamId")
-//                    }l streamId =
-////                    soundPool.play(soundId, 1f, 1f, 1, 0, 1f)
-////
-////                    if (streamId == 0) {
-////                        println("DEBUG: SoundPool failed! (Return code 0)")
-////                    } else {
-////                        println("DEBUG: SoundPool reports SUCCESS playing stream: $streamId")
-////                    }
-//                }
 
                 delay(interval)
             }
@@ -90,4 +71,12 @@ actual class MetronomeEngine actual constructor() {
     }
 
     actual fun isPlaying(): Boolean = isRunning.load()
+
+    actual fun playTick(isAccent: Boolean) {
+        if (isAccent) {
+            toneGen.startTone(android.media.ToneGenerator.TONE_DTMF_S, 60)
+        } else {
+            toneGen.startTone(android.media.ToneGenerator.TONE_PROP_BEEP, 50)
+        }
+    }
 }

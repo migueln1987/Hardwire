@@ -77,4 +77,8 @@ actual class MetronomeEngine actual constructor() {
 
     actual fun isPlaying(): Boolean = isRunning.load()
 
+    actual fun playTick(isAccent: Boolean) {
+
+    }
+
 }
