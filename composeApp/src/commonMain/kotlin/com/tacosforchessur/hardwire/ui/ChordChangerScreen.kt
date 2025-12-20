@@ -2,24 +2,35 @@
 
 package com.tacosforchessur.hardwire.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -45,7 +56,8 @@ import com.tacosforchessur.hardwire.viewmodel.MetronomeViewModel
 fun ChordChangerScreen(
     metronomeVm: MetronomeViewModel,
     chordVm: ChordChangerViewModel,
-    onNavigateToMetronome: (Int) -> Unit
+    onNavigateToMetronome: (Int) -> Unit,
+    onNavigateToLibrary: () -> Unit,
 ) {
     val currentBeat = metronomeVm.currentBeat
     val isTicking by metronomeVm.isTicking.collectAsState()
@@ -61,9 +73,9 @@ fun ChordChangerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text =  "Chord Practice") },
+                title = { Text(text = "Chord Practice") },
                 actions = {
-                    IconButton(onClick = {metronomeVm.toggleMetronome() }) {
+                    IconButton(onClick = { metronomeVm.toggleMetronome() }) {
                         Text(if (isTicking) "⏸" else "▶")
                     }
                 }
@@ -79,7 +91,14 @@ fun ChordChangerScreen(
                 )
                 chordVm.currentChord?.let { chord ->
                     println("chord: $chord")
-                    ChordDiagram(chord = chord, baseFret = 1)
+                    Column {
+                        Text(
+                            text = chord.name,
+                            style = MaterialTheme.typography.headlineLarge,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    }
+                    ChordDiagram(chord = chord)
                 }
             }
             Column(
@@ -93,6 +112,12 @@ fun ChordChangerScreen(
                 ) {
                     Text("Adjust Metronome & BPM")
                 }
+                OutlinedButton(
+                    onClick = { onNavigateToLibrary() },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                ) {
+                    Text("Choose chords to practice")
+                }
             }
         }
     }
@@ -105,15 +130,9 @@ const val FRETS = 5
 fun ChordDiagram(
     chord: Chord = ChordLibrary.A_Major,
     modifier: Modifier = Modifier,
-    baseFret: Int = 1,
     inlays: List<Int> = listOf(3, 5, 7, 9, 12, 15)
 ) {
     Column {
-        Text(
-            text = chord.name,
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.ExtraBold
-        )
         Row(modifier = Modifier.fillMaxWidth()) {
             val tuning = listOf("E", "A", "D", "G", "B", "E")
             repeat(STRINGS) { i ->
@@ -140,10 +159,10 @@ fun ChordDiagram(
                     val fretSpacing = size.height / FRETS
                     val fretBoardCenter = size.width / 2f
                     val columnWith = size.width / STRINGS
-                    drawFretboard(fretSpacing, baseFret)
+                    drawFretboard(fretSpacing, chord.baseFret)
                     drawInlays(
                         inlays = inlays,
-                        baseFret = baseFret,
+                        baseFret = chord.baseFret,
                         fretSpacing = fretSpacing,
                         fretBoardCenter = fretBoardCenter,
                         columnWith = columnWith
@@ -151,11 +170,11 @@ fun ChordDiagram(
                 }) {
             Column(modifier = Modifier.fillMaxSize()) {
                 repeat(FRETS) { rowIndex ->
-                    val currentFret = baseFret + rowIndex
+                    val currentFret = chord.baseFret + rowIndex
                     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                        if (baseFret > 1) {
+                        if (chord.baseFret > 1) {
                             Text(
-                                text = "${baseFret + rowIndex}",
+                                text = "${chord.baseFret + rowIndex}",
                                 fontSize = 12.sp,
                                 color = Color.Gray,
                                 fontWeight = FontWeight.Bold
@@ -326,5 +345,129 @@ object ChordLibrary {
         mutedString = listOf(1)
     )
 
-    val allChords = listOf(G_Major, C_Major, A_Major)
+    val B_Minor = Chord(
+        name = "B Minor",
+        baseFret = 2,
+        barre = Barre(fret = 1, startString = 2, endString = 6),
+        fingers = listOf(
+            Finger(string = 2, fret = 1, label = "1"), // Part of barre
+            Finger(string = 3, fret = 3, label = "3"),
+            Finger(string = 4, fret = 3, label = "4"),
+            Finger(string = 5, fret = 2, label = "2")
+        ),
+        mutedString = listOf(1)
+    )
+
+    val D_Major_High = Chord(
+        name = "D (Pos V)",
+        baseFret = 5,
+        fingers = listOf(
+            Finger(string = 2, fret = 1, label = "1"),
+            Finger(string = 3, fret = 3, label = "2"),
+            Finger(string = 4, fret = 3, label = "3"),
+            Finger(string = 5, fret = 3, label = "4")
+        ),
+        mutedString = listOf(1, 6)
+    )
+
+    val E_Minor_7 = Chord(
+        name = "Em7",
+        fingers = listOf(
+            Finger(string = 2, fret = 2, label = "2")
+        )
+    )
+
+    val allChords = listOf(G_Major, C_Major, A_Major, B_Minor, D_Major_High, E_Minor_7)
+}
+
+@Composable
+fun ChordLibraryScreen(
+    chordVm: ChordChangerViewModel,
+    onBack: () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text(text = "Practice Library") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Text(text = "<-")
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier.padding(paddingValues = paddingValues).fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            items(ChordLibrary.allChords) { chord ->
+                val isSelected = chordVm.practicePool.contains(chord)
+                ChordSelectionCard(
+                    chord = chord,
+                    isSelected = isSelected,
+                    onToggle = { chordVm.toggleChordSelection(chord)}
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ChordSelectionCard(
+    chord: Chord,
+    isSelected: Boolean,
+    onToggle: () -> Unit,
+) {
+    Surface(
+        onClick = onToggle,
+        shape = RoundedCornerShape(12.dp),
+        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer
+        else MaterialTheme.colorScheme.surfaceVariant,
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+        else null,
+        modifier = Modifier
+            .padding(4.dp)
+            .height(180.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = chord.name,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            ChordDiagram(
+                chord = chord,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+fun ChordSelectionCardPreview() {
+    MaterialTheme {
+        Column {
+            ChordSelectionCard(
+                chord = ChordLibrary.C_Major,
+                isSelected = true,
+                onToggle = { }
+            )
+            ChordSelectionCard(
+                chord = ChordLibrary.A_Major,
+                isSelected = false,
+                onToggle = { }
+            )
+        }
+    }
 }

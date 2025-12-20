@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.tacosforchessur.hardwire.ui.ChordChangerScreen
+import com.tacosforchessur.hardwire.ui.ChordLibraryScreen
 import com.tacosforchessur.hardwire.ui.HomeScreen
 import com.tacosforchessur.hardwire.ui.MetronomeScreen
 import com.tacosforchessur.hardwire.viewmodel.ChordChangerViewModel
@@ -26,9 +27,10 @@ fun App() {
             startDestination = HomeRoute
         ) {
             composable<HomeRoute> {
-                HomeScreen(onNavigateToMetronome = { bpm ->
-                    navController.navigate(MetronomeRoute(bpm))
-                },
+                HomeScreen(
+                    onNavigateToMetronome = { bpm ->
+                        navController.navigate(MetronomeRoute(bpm))
+                    },
                     onNavigateToChordChanger = {
                         navController.navigate(route = ChordChangerRoute)
                     })
@@ -48,7 +50,17 @@ fun App() {
                     chordVm = chordVm,
                     onNavigateToMetronome = { bpm ->
                         navController.navigate(MetronomeRoute(bpm))
+                    },
+                    onNavigateToLibrary = {
+                        navController.navigate(ChordLibraryScreen)
                     }
+                )
+            }
+
+            composable<ChordLibraryScreen> {
+                ChordLibraryScreen(
+                    chordVm = chordVm,
+                    onBack = { navController.popBackStack() }
                 )
             }
         }

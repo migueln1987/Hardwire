@@ -37,4 +37,17 @@ class ChordChangerViewModel : ViewModel() {
         }
         currentChord = next
     }
+
+    fun toggleChordSelection(chord: Chord) {
+        if (_practicePool.contains(chord)) {
+            if (_practicePool.size > 1) {
+                _practicePool.remove(chord)
+                if (currentChord == chord) {
+                    pickNextChord()
+                }
+            }
+        } else {
+            _practicePool.add(chord)
+        }
+    }
 }

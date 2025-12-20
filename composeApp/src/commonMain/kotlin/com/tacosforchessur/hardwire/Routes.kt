@@ -10,3 +10,6 @@ data class MetronomeRoute(val initialBpm: Int = 120)
 
 @Serializable
 object ChordChangerRoute
+
+@Serializable
+object ChordLibraryScreen
