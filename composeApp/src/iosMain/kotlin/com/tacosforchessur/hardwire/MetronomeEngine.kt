@@ -20,7 +20,8 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 actual class MetronomeEngine actual constructor() {
 
     actual var onTick: (() -> Unit)? = null
-//    private var audioPlayer: AVAudioPlayer? = null
+
+    //    private var audioPlayer: AVAudioPlayer? = null
     private val isRunning = AtomicBoolean(false)
     private var bpm: Int = 120
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -47,13 +48,17 @@ actual class MetronomeEngine actual constructor() {
 
     actual fun start() {
         if (!isRunning.compareAndSet(expectedValue = false, newValue = true)) return
+        if (!engine.running) {
+            engine.startAndReturnError(null)
+        }
         job = scope.launch {
-                while (isRunning.load()) {
-                    val interval = 60000L / bpm
-                    onTick?.invoke()
-                    delay(interval)
-                }
+            delay(100)
+            while (isRunning.load()) {
+                val interval = 60000L / bpm
+                onTick?.invoke()
+                delay(interval)
             }
+        }
     }
 
     actual fun stop() {

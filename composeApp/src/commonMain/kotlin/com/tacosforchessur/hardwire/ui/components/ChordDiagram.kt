@@ -96,7 +96,7 @@ fun ChordDiagram(
                                     }
                                     FingerMarker(
                                         label = displayLabel,
-                                        modifier = Modifier.size(maxWidth * 0.7f)
+                                        modifier = Modifier.size(minOf(maxWidth, maxHeight) * 0.7f)
                                     )
                                 }
                             }
