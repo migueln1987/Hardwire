@@ -1,4 +1,4 @@
-package com.tacosforchessur.hardwire.ui
+package com.tacosforchessur.hardwire.ui.screens.home
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column

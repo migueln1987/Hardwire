@@ -5,8 +5,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.tacosforchessur.hardwire.ui.Chord
-import com.tacosforchessur.hardwire.ui.ChordLibrary
+import com.tacosforchessur.hardwire.domain.models.Chord
+import com.tacosforchessur.hardwire.domain.repository.ChordLibrary
 
 class ChordChangerViewModel : ViewModel() {
     private val _practicePool = mutableStateListOf<Chord>()
