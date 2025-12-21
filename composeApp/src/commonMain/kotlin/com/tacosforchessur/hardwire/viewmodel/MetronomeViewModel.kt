@@ -58,17 +58,4 @@ class MetronomeViewModel : ViewModel() {
         super.onCleared()
     }
 
-    fun startMetronome() {
-        viewModelScope.launch {
-            try {
-                val audioBytes = Res.readBytes("files/tik.wav")
-                engine.setAudioData(audioBytes)
-                engine.start()
-            } catch (e: Exception) {
-                println("TRACE: ERROR - ${e.message}")
-                e.printStackTrace()
-            }
-
-        }
-    }
 }
