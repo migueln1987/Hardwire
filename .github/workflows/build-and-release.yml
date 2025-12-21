@@ -35,10 +35,44 @@ jobs:
       - name: Detect iOS Project Info
         working-directory: ./iosApp
         run: |
-          SCHEME=$(xcodebuild -list -json | ruby -e "require 'json'; puts JSON.parse(STDIN.gets)['project']['targets'][0]")
-          echo "SCHEME=$SCHEME" >> $GITHUB_ENV
-          [ -d *.xcworkspace ] && echo "F_TYPE=workspace" >> $GITHUB_ENV || echo "F_TYPE=project" >> $GITHUB_ENV
-          [ -d *.xcworkspace ] && echo "F_NAME=$(ls -d *.xcworkspace | head -1)" >> $GITHUB_ENV || echo "F_NAME=$(ls -d *.xcodeproj | head -1)" >> $GITHUB_ENV
+          # 1. Capture JSON to file
+          xcodebuild -list -json > project_info.json
+
+          # 2. Use Python to safely parse despite hidden BOM/Encoding issues
+          python3 << 'EOF'
+          import json
+          import os
+          import sys
+
+          try:
+              with open("project_info.json", "rb") as f:
+                  # decode with utf-8-sig to strip potential Byte Order Marks
+                  raw = f.read().decode("utf-8-sig", errors="ignore")
+              
+              # Find the actual start of the JSON object
+              start = raw.find("{")
+              if start == -1:
+                  raise ValueError("No valid JSON found in xcodebuild output")
+              
+              data = json.loads(raw[start:])
+              scheme = data['project']['targets'][0]
+              
+              with open(os.environ['GITHUB_ENV'], 'a') as env:
+                  env.write(f"SCHEME={scheme}\n")
+              print(f"Detected SCHEME: {scheme}")
+          except Exception as e:
+              print(f"Logic Error: {e}")
+              sys.exit(1)
+          EOF
+
+          # 3. Detect Project vs Workspace
+          if [ -d *.xcworkspace ]; then
+            echo "F_TYPE=workspace" >> $GITHUB_ENV
+            echo "F_NAME=$(ls -d *.xcworkspace | head -1)" >> $GITHUB_ENV
+          else
+            echo "F_TYPE=project" >> $GITHUB_ENV
+            echo "F_NAME=$(ls -d *.xcodeproj | head -1)" >> $GITHUB_ENV
+          fi
 
       - name: Archive iOS
         working-directory: ./iosApp
@@ -55,17 +89,14 @@ jobs:
       - name: Package Assets
         run: |
           APP_NAME="Hardwire"
-          # Use tag name if available, otherwise use 'manual'
           VERSION=${GITHUB_REF_NAME:-"manual"}
           
-          # Prepare iOS IPA (wrapping the .app in a Payload folder)
           mkdir -p $PWD/build/Payload
           cp -r $PWD/build/Runner.xcarchive/Products/Applications/*.app $PWD/build/Payload/
           cd build
           zip -r "${APP_NAME}-${VERSION}.ipa" Payload
           cd ..
           
-          # Prepare Android APK (copy and rename for the release)
           cp composeApp/build/outputs/apk/debug/*.apk "build/${APP_NAME}-${VERSION}.apk"
 
       - name: Create GitHub Release
@@ -81,12 +112,10 @@ jobs:
             
             ### Android
             1. Download the `.apk` file below.
-            2. Install directly on your device.
             
             ### iOS
             1. Download the `.ipa` file below.
-            2. Use **Sideloadly** or **AltStore** to install on your iPhone.
-            3. Remember to "Trust" the app in Settings > General > VPN & Device Management.
+            2. Sideload via AltStore or Sideloadly.
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
