@@ -35,24 +35,25 @@ jobs:
       - name: Detect iOS Project Info
         working-directory: ./iosApp
         run: |
-          # 1. Capture the JSON and strip any leading/trailing non-JSON text
           RAW_JSON=$(xcodebuild -list -json)
-          CLEAN_JSON=$(echo "$RAW_JSON" | sed -n '/{/,/}/p')
           
-          # 2. Use Ruby to read the WHOLE string and pick the first target OR scheme
+          # This cleans out hidden characters and only takes what is between the first { and last }
+          CLEAN_JSON=$(echo "$RAW_JSON" | sed -n '/{/,/}/p')
+
           SCHEME=$(echo "$CLEAN_JSON" | ruby -e "
             require 'json'
-            data = JSON.parse(STDIN.read)
-            # Try to get the first target, if not, the first scheme
-            target = data['project']['targets']&.first
-            scheme = data['project']['schemes']&.first
-            puts target || scheme
+            # Read the whole input and strip non-visible characters from the start/end
+            raw_input = STDIN.read.strip
+            
+            # Force encoding to UTF-8 and remove the BOM (Byte Order Mark) if it exists
+            clean_input = raw_input.force_encoding('UTF-8').gsub(/\xEF\xBB\xBF/, '')
+            
+            data = JSON.parse(clean_input)
+            puts data['project']['targets'][0] || data['project']['schemes'][0]
           ")
           
           echo "SCHEME=$SCHEME" >> $GITHUB_ENV
-          [ -d *.xcworkspace ] && echo "F_TYPE=workspace" >> $GITHUB_ENV || echo "F_TYPE=project" >> $GITHUB_ENV
-          [ -d *.xcworkspace ] && echo "F_NAME=$(ls -d *.xcworkspace | head -1)" >> $GITHUB_ENV || echo "F_NAME=$(ls -d *.xcodeproj | head -1)" >> $GITHUB_ENV
-
+          
       - name: Archive iOS
         working-directory: ./iosApp
         run: |
