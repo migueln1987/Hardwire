@@ -6,10 +6,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.tacosforchessur.hardwire.ui.ChordChangerScreen
-import com.tacosforchessur.hardwire.ui.ChordLibraryScreen
-import com.tacosforchessur.hardwire.ui.HomeScreen
-import com.tacosforchessur.hardwire.ui.MetronomeScreen
+import com.tacosforchessur.hardwire.ui.screens.trainer.ChordChangerScreen
+import com.tacosforchessur.hardwire.ui.screens.home.HomeScreen
+import com.tacosforchessur.hardwire.ui.screens.library.ChordLibraryScreen
+import com.tacosforchessur.hardwire.ui.screens.metronome.MetronomeScreen
 import com.tacosforchessur.hardwire.viewmodel.ChordChangerViewModel
 import com.tacosforchessur.hardwire.viewmodel.MetronomeViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
