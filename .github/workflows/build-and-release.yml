@@ -35,12 +35,19 @@ jobs:
       - name: Detect iOS Project Info
         working-directory: ./iosApp
         run: |
-          # Filter xcodebuild output to only include lines between the first '{' and the last '}'
+          # 1. Capture the JSON and strip any leading/trailing non-JSON text
           RAW_JSON=$(xcodebuild -list -json)
           CLEAN_JSON=$(echo "$RAW_JSON" | sed -n '/{/,/}/p')
           
-          # Now parse the cleaned JSON
-          SCHEME=$(echo "$CLEAN_JSON" | ruby -e "require 'json'; puts JSON.parse(STDIN.read)['project']['targets'][0]")
+          # 2. Use Ruby to read the WHOLE string and pick the first target OR scheme
+          SCHEME=$(echo "$CLEAN_JSON" | ruby -e "
+            require 'json'
+            data = JSON.parse(STDIN.read)
+            # Try to get the first target, if not, the first scheme
+            target = data['project']['targets']&.first
+            scheme = data['project']['schemes']&.first
+            puts target || scheme
+          ")
           
           echo "SCHEME=$SCHEME" >> $GITHUB_ENV
           [ -d *.xcworkspace ] && echo "F_TYPE=workspace" >> $GITHUB_ENV || echo "F_TYPE=project" >> $GITHUB_ENV
