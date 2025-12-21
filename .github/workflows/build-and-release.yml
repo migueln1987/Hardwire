@@ -1,9 +1,10 @@
 name: Build and Release (Android & iOS)
+
 on:
   push:
     tags:
       - 'v*' 
-  workflow_dispatch: # This is the "Manual Button" in the Actions tab
+  workflow_dispatch:
 
 jobs:
   build:
@@ -32,6 +33,7 @@ jobs:
         run: ./gradlew :composeApp:linkReleaseFrameworkIosArm64
 
       - name: Detect iOS Project Info
+        working-directory: ./iosApp
         run: |
           SCHEME=$(xcodebuild -list -json | ruby -e "require 'json'; puts JSON.parse(STDIN.gets)['project']['targets'][0]")
           echo "SCHEME=$SCHEME" >> $GITHUB_ENV
@@ -39,31 +41,55 @@ jobs:
           [ -d *.xcworkspace ] && echo "F_NAME=$(ls -d *.xcworkspace | head -1)" >> $GITHUB_ENV || echo "F_NAME=$(ls -d *.xcodeproj | head -1)" >> $GITHUB_ENV
 
       - name: Archive iOS
+        working-directory: ./iosApp
         run: |
-          xcodebuild archive -$F_TYPE "$F_NAME" -scheme "$SCHEME" -configuration Release -archivePath $PWD/build/Runner.xcarchive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          xcodebuild archive \
+            -$F_TYPE "$F_NAME" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -archivePath $PWD/../build/Runner.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_IDENTITY=""
 
       - name: Package Assets
         run: |
-          # Define App Name
           APP_NAME="Hardwire"
-          VERSION=${GITHUB_REF_NAME} # This will be 'v1.0.0' or the branch name
+          # Use tag name if available, otherwise use 'manual'
+          VERSION=${GITHUB_REF_NAME:-"manual"}
           
-          # Prepare iOS IPA
+          # Prepare iOS IPA (wrapping the .app in a Payload folder)
           mkdir -p $PWD/build/Payload
           cp -r $PWD/build/Runner.xcarchive/Products/Applications/*.app $PWD/build/Payload/
           cd build
           zip -r "${APP_NAME}-${VERSION}.ipa" Payload
           cd ..
           
-          # Prepare Android APK (Renaming it)
+          # Prepare Android APK (copy and rename for the release)
           cp composeApp/build/outputs/apk/debug/*.apk "build/${APP_NAME}-${VERSION}.apk"
 
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/') # Only create release if it's a tag
+        if: startsWith(github.ref, 'refs/tags/')
         uses: ncipollo/release-action@v1
         with:
           artifacts: "build/*.apk,build/*.ipa"
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
           name: "Release ${{ github.ref_name }}"
-          body: "New build for testing. Use Sideloadly for the IPA and install the APK directly on Android."
+          body: |
+            ## 🚀 New Build Ready for Testing
+            
+            ### Android
+            1. Download the `.apk` file below.
+            2. Install directly on your device.
+            
+            ### iOS
+            1. Download the `.ipa` file below.
+            2. Use **Sideloadly** or **AltStore** to install on your iPhone.
+            3. Remember to "Trust" the app in Settings > General > VPN & Device Management.
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-outputs
+          path: build/*.ipa
