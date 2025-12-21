@@ -189,6 +189,7 @@ fun ChordDiagram(
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (finger != null) {
+                                    val markerSize = if (maxWidth < maxHeight) maxWidth * 0.7f else maxHeight * 0.7f
                                     val displayLabel = if (finger.label.isNullOrEmpty()) {
                                         if (finger.fret > 0) finger.fret.toString() else ""
                                     } else {
@@ -196,7 +197,7 @@ fun ChordDiagram(
                                     }
                                     FingerMarker(
                                         label = displayLabel,
-                                        modifier = Modifier.size(maxWidth * 0.7f)
+                                        modifier = Modifier.size(markerSize)
                                     )
                                 }
                             }
