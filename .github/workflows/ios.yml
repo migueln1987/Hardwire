@@ -1,4 +1,4 @@
-name: KMP/CMP iOS Build
+name: KMP/CMP iOS IPA Build
 on:
   push:
     branches: [ "main" ]
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build and Test KMP iOS
+    name: Create iOS IPA
     runs-on: macos-latest
     
     steps:
@@ -17,44 +17,55 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17' # CMP usually requires Java 17+
+          java-version: '17'
           distribution: 'zulu'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      # 1. Build the Kotlin shared framework
+      # If your folder is not 'composeApp', change ':composeApp' below to your module name
       - name: Build KMP Shared Framework
-        run: ./gradlew :shared:linkReleaseFrameworkIosSimulatorArm64
+        run: ./gradlew :composeApp:linkReleaseFrameworkIosArm64
 
-      - name: Set Default Scheme
+      # 2. Detect Project and Scheme Names
+      - name: Set Environment Variables
         run: |
-          scheme_list=$(xcodebuild -list -json | tr -d "\n")
-          default=$(echo $scheme_list | ruby -e "require 'json'; puts JSON.parse(STDIN.gets)['project']['targets'][0]")
-          echo "SCHEME=$default" >> $GITHUB_ENV
-          echo "Using default scheme: $default"
-
-      - name: Build & Test
-        env:
-          PLATFORM: 'iOS Simulator'
-        run: |
-          # Find the first available iPhone simulator
-          DEVICE=$(xcrun xctrace list devices 2>&1 | grep -oE 'iPhone.*?[^\(]+' | head -1 | sed -e "s/ Simulator$//" | xargs)
-          
-          # Detect workspace or project
+          SCHEME=$(xcodebuild -list -json | ruby -e "require 'json'; puts JSON.parse(STDIN.gets)['project']['targets'][0]")
+          echo "SCHEME=$SCHEME" >> $GITHUB_ENV
           if [ -d *.xcworkspace ]; then
-            FILE_TYPE="workspace"
-            FILE_NAME=$(ls -d *.xcworkspace | head -1)
+            echo "FILE_TYPE=workspace" >> $GITHUB_ENV
+            echo "FILE_NAME=$(ls -d *.xcworkspace | head -1)" >> $GITHUB_ENV
           else
-            FILE_TYPE="project"
-            FILE_NAME=$(ls -d *.xcodeproj | head -1)
+            echo "FILE_TYPE=project" >> $GITHUB_ENV
+            echo "FILE_NAME=$(ls -d *.xcodeproj | head -1)" >> $GITHUB_ENV
           fi
 
-          # Build and Test
-          xcodebuild test \
+      # 3. Create the Archive (Unsigned)
+      - name: Archive Build
+        run: |
+          xcodebuild archive \
+            -$FILE_TYPE "$FILE_NAME" \
             -scheme "$SCHEME" \
-            -"$FILE_TYPE" "$FILE_NAME" \
-            -destination "platform=$PLATFORM,name=$DEVICE" \
-            -configuration Debug \
-            CODE_SIGN_IDENTITY="" \
+            -configuration Release \
+            -archivePath $PWD/build/Runner.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_IDENTITY=""
+
+      # 4. Convert Archive to IPA for Sideloading
+      - name: Export IPA
+        run: |
+          mkdir -p $PWD/build/Payload
+          cp -r $PWD/build/Runner.xcarchive/Products/Applications/*.app $PWD/build/Payload/
+          cd build
+          zip -r ios-app.ipa Payload
+          
+      # 5. Upload the IPA as a downloadable artifact
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa-build
+          path: build/ios-app.ipa
+          retention-days: 7
+H
