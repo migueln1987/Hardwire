@@ -1,4 +1,4 @@
-package com.tacosforchessur.hardwire.ui
+package com.tacosforchessur.hardwire.ui.screens.metronome
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
