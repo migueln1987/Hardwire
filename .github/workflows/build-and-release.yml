@@ -77,7 +77,7 @@ jobs:
           tag: ${{ github.ref_name }}
           name: "Release ${{ github.ref_name }}"
           body: |
-            ## 🚀 New Build Ready for Testing
+            ## New Build Ready for Testing
             
             ### Android
             1. Download the `.apk` file below.
