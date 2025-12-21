@@ -35,7 +35,13 @@ jobs:
       - name: Detect iOS Project Info
         working-directory: ./iosApp
         run: |
-          SCHEME=$(xcodebuild -list -json | ruby -e "require 'json'; puts JSON.parse(STDIN.gets)['project']['targets'][0]")
+          # Filter xcodebuild output to only include lines between the first '{' and the last '}'
+          RAW_JSON=$(xcodebuild -list -json)
+          CLEAN_JSON=$(echo "$RAW_JSON" | sed -n '/{/,/}/p')
+          
+          # Now parse the cleaned JSON
+          SCHEME=$(echo "$CLEAN_JSON" | ruby -e "require 'json'; puts JSON.parse(STDIN.read)['project']['targets'][0]")
+          
           echo "SCHEME=$SCHEME" >> $GITHUB_ENV
           [ -d *.xcworkspace ] && echo "F_TYPE=workspace" >> $GITHUB_ENV || echo "F_TYPE=project" >> $GITHUB_ENV
           [ -d *.xcworkspace ] && echo "F_NAME=$(ls -d *.xcworkspace | head -1)" >> $GITHUB_ENV || echo "F_NAME=$(ls -d *.xcodeproj | head -1)" >> $GITHUB_ENV
