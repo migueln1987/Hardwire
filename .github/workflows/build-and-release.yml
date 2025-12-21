@@ -1,0 +1,69 @@
+name: Build and Release (Android & iOS)
+on:
+  push:
+    tags:
+      - 'v*' 
+  workflow_dispatch: # This is the "Manual Button" in the Actions tab
+
+jobs:
+  build:
+    name: Build Multiplatform App
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build Android APK
+        run: ./gradlew :composeApp:assembleDebug
+
+      - name: Build KMP Shared Framework
+        run: ./gradlew :composeApp:linkReleaseFrameworkIosArm64
+
+      - name: Detect iOS Project Info
+        run: |
+          SCHEME=$(xcodebuild -list -json | ruby -e "require 'json'; puts JSON.parse(STDIN.gets)['project']['targets'][0]")
+          echo "SCHEME=$SCHEME" >> $GITHUB_ENV
+          [ -d *.xcworkspace ] && echo "F_TYPE=workspace" >> $GITHUB_ENV || echo "F_TYPE=project" >> $GITHUB_ENV
+          [ -d *.xcworkspace ] && echo "F_NAME=$(ls -d *.xcworkspace | head -1)" >> $GITHUB_ENV || echo "F_NAME=$(ls -d *.xcodeproj | head -1)" >> $GITHUB_ENV
+
+      - name: Archive iOS
+        run: |
+          xcodebuild archive -$F_TYPE "$F_NAME" -scheme "$SCHEME" -configuration Release -archivePath $PWD/build/Runner.xcarchive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+      - name: Package Assets
+        run: |
+          # Define App Name
+          APP_NAME="Hardwire"
+          VERSION=${GITHUB_REF_NAME} # This will be 'v1.0.0' or the branch name
+          
+          # Prepare iOS IPA
+          mkdir -p $PWD/build/Payload
+          cp -r $PWD/build/Runner.xcarchive/Products/Applications/*.app $PWD/build/Payload/
+          cd build
+          zip -r "${APP_NAME}-${VERSION}.ipa" Payload
+          cd ..
+          
+          # Prepare Android APK (Renaming it)
+          cp composeApp/build/outputs/apk/debug/*.apk "build/${APP_NAME}-${VERSION}.apk"
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/') # Only create release if it's a tag
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/*.apk,build/*.ipa"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+          name: "Release ${{ github.ref_name }}"
+          body: "New build for testing. Use Sideloadly for the IPA and install the APK directly on Android."
