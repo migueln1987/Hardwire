@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -62,9 +63,10 @@ fun BoxScope.DebugConsole(
             }
             LazyColumn(
                 modifier = Modifier.weight(1f).padding(8.dp),
-                reverseLayout = true
+                reverseLayout = true,
+                verticalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.Bottom)
             ) {
-                items(Logger.logs) { entry ->
+                items(Logger.logs.asReversed()) { entry ->
                     val textColor = when (entry.level) {
                         LogLevel.ERROR -> Color.Red
                         LogLevel.DEBUG -> Color.Green
