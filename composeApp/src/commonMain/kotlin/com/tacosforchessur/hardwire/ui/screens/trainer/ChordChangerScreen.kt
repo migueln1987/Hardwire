@@ -3,7 +3,9 @@
 package com.tacosforchessur.hardwire.ui.screens.trainer
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -44,7 +46,8 @@ fun ChordChangerScreen(
             }
         }
     }
-
+    // TODO: Refactor so there are no duplicate blocks,
+    //  new components need a modifier to restrict the ChordDiagram's with on tablets
     Scaffold(
         topBar = {
             TopAppBar(
@@ -57,43 +60,90 @@ fun ChordChangerScreen(
             )
         }
     ) { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp)) {
-            Column(modifier = Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = currentBeat.toString(),
-                    style = MaterialTheme.typography.displayLarge,
-                    color = if (currentBeat == 1) Color.Red else Color.Green
-                )
-                chordVm.currentChord?.let { chord ->
-                    println("chord: $chord")
-                    Column {
-                        Text(
-                            text = chord.name,
-                            style = MaterialTheme.typography.headlineLarge,
-                            fontWeight = FontWeight.ExtraBold
-                        )
+        // TODO: Extract outer most BoxWithConstraints into an AdapticeScreen wrapper
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val isTablet = maxWidth > 600.dp
+            if (isTablet) {
+                Row(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+                    Column(
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        OutlinedButton(
+                            onClick = { onNavigateToMetronome(metronomeVm.bpm.value) },
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                        ) {
+                            Text("Adjust Metronome & BPM")
+                        }
+                        OutlinedButton(
+                            onClick = { onNavigateToLibrary() },
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                        ) {
+                            Text("Choose chords to practice")
+                        }
                     }
-                    ChordDiagram(chord = chord)
+                    Column(modifier = Modifier.weight(3f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = currentBeat.toString(),
+                            style = MaterialTheme.typography.displayLarge,
+                            color = if (currentBeat == 1) Color.Red else Color.Green
+                        )
+                        chordVm.currentChord?.let { chord ->
+                            println("chord: $chord")
+                            Column {
+                                Text(
+                                    text = chord.name,
+                                    style = MaterialTheme.typography.headlineLarge,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
+                            ChordDiagram(chord = chord)
+                        }
+                    }
+
                 }
-            }
-            Column(
-                modifier = Modifier.weight(1f).fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                OutlinedButton(
-                    onClick = { onNavigateToMetronome(metronomeVm.bpm.value) },
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
-                ) {
-                    Text("Adjust Metronome & BPM")
-                }
-                OutlinedButton(
-                    onClick = { onNavigateToLibrary() },
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
-                ) {
-                    Text("Choose chords to practice")
+            } else {
+                Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp)) {
+                    Column(modifier = Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = currentBeat.toString(),
+                            style = MaterialTheme.typography.displayLarge,
+                            color = if (currentBeat == 1) Color.Red else Color.Green
+                        )
+                        chordVm.currentChord?.let { chord ->
+                            println("chord: $chord")
+                            Column {
+                                Text(
+                                    text = chord.name,
+                                    style = MaterialTheme.typography.headlineLarge,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
+                            ChordDiagram(chord = chord)
+                        }
+                    }
+                    Column(
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        OutlinedButton(
+                            onClick = { onNavigateToMetronome(metronomeVm.bpm.value) },
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                        ) {
+                            Text("Adjust Metronome & BPM")
+                        }
+                        OutlinedButton(
+                            onClick = { onNavigateToLibrary() },
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                        ) {
+                            Text("Choose chords to practice")
+                        }
+                    }
                 }
             }
         }
+
     }
 }

@@ -4,11 +4,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +34,12 @@ fun ChordDiagram(
     modifier: Modifier = Modifier,
     inlays: List<Int> = listOf(3, 5, 7, 9, 12, 15)
 ) {
-    Column {
+    Column(modifier = Modifier
+        .fillMaxHeight()
+        .widthIn(min = 280.dp, max = 600.dp)
+        .padding(16.dp)
+        .wrapContentWidth(Alignment.CenterHorizontally)
+    ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             val tuning = listOf("E", "A", "D", "G", "B", "E")
             repeat(STRINGS) { i ->
@@ -54,6 +62,8 @@ fun ChordDiagram(
             modifier = modifier
                 .fillMaxSize()
                 .weight(1f)
+                .fillMaxWidth()
+                .padding(vertical = 16.dp)
                 .drawBehind {
                     val fretSpacing = size.height / FRETS
                     val fretBoardCenter = size.width / 2f
@@ -96,7 +106,10 @@ fun ChordDiagram(
                                     }
                                     FingerMarker(
                                         label = displayLabel,
-                                        modifier = Modifier.size(minOf(maxWidth, maxHeight) * 0.7f)
+                                        modifier = Modifier
+                                            .padding(4.dp)
+                                            .fillMaxSize(0.7f)
+                                            .aspectRatio(1f)
                                     )
                                 }
                             }
