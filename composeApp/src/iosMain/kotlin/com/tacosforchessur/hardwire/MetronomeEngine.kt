@@ -1,5 +1,6 @@
 package com.tacosforchessur.hardwire
 
+import com.tacosforchessur.hardwire.core.logging.Logger
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineScope
@@ -50,9 +51,9 @@ actual class MetronomeEngine actual constructor() {
         job = scope.launch {
                 while (isRunning.load()) {
                     val interval = 60000L / bpm
-                    println("engine::invoking tick")
+                    Logger.d("engine::invoking tick")
                     onTick?.invoke()
-                    println("engine::delaying $interval")
+                    Logger.d("engine::delaying $interval")
                     delay(interval)
                 }
             }
@@ -64,23 +65,23 @@ actual class MetronomeEngine actual constructor() {
     }
 
     actual fun setBpm(bpm: Int) {
-        println("engine::bpm being set to $bpm")
+        Logger.d("engine::bpm being set to $bpm")
         this.bpm = bpm
     }
 
     actual fun isPlaying(): Boolean = isRunning.load()
 
     actual fun playTick(isAccent: Boolean) {
-        println("engine::playing tick ${if (isAccent) " with accent" else "without accent" }")
+        Logger.d("engine::playing tick ${if (isAccent) " with accent" else "without accent" }")
         val note = if (isAccent) 84u.toUByte() else 72u.toUByte()
         val velocity = if (isAccent) 127u.toUByte() else 100u.toUByte()
-        println("engine::starting note")
+        Logger.d("engine::starting note")
         sampler.startNote(note, velocity, 0u.toUByte())
-        println("engine::starting coroutine")
+        Logger.d("engine::starting coroutine")
         scope.launch {
-            println("engine::delaying note")
+            Logger.d("engine::delaying note")
             delay(60)
-            println("engine::stopping note")
+            Logger.d("engine::stopping note")
             sampler.stopNote(note, 0u.toUByte())
         }
     }

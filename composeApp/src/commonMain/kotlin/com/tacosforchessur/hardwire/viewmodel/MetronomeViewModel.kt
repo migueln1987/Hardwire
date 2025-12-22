@@ -4,14 +4,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.tacosforchessur.hardwire.MetronomeEngine
-import com.tacosforchessur.hardwire.Res
+import com.tacosforchessur.hardwire.core.logging.Logger
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 class MetronomeViewModel : ViewModel() {
 
@@ -32,12 +30,12 @@ class MetronomeViewModel : ViewModel() {
     init {
         engine.onTick = {
             val isAccent = (currentBeat == 1)
-            println("viewmodel::isAccent: $isAccent")
-            println("viewmodel::playing tick")
+            Logger.d("viewmodel::isAccent: $isAccent")
+            Logger.d("viewmodel::playing tick")
             engine.playTick(isAccent)
-            println("viewmodel::beatsPerMeasure: $beatsPerMeasure")
+            Logger.d("viewmodel::beatsPerMeasure: $beatsPerMeasure")
             currentBeat = if (currentBeat >= beatsPerMeasure) 1 else currentBeat + 1
-            println("viewmodel::currentBeat: $currentBeat")
+            Logger.d("viewmodel::currentBeat: $currentBeat")
             _tickEvent.tryEmit(currentBeat)
         }
     }
