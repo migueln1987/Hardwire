@@ -32,8 +32,12 @@ class MetronomeViewModel : ViewModel() {
     init {
         engine.onTick = {
             val isAccent = (currentBeat == 1)
+            println("viewmodel::isAccent: $isAccent")
+            println("viewmodel::playing tick")
             engine.playTick(isAccent)
+            println("viewmodel::beatsPerMeasure: $beatsPerMeasure")
             currentBeat = if (currentBeat >= beatsPerMeasure) 1 else currentBeat + 1
+            println("viewmodel::currentBeat: $currentBeat")
             _tickEvent.tryEmit(currentBeat)
         }
     }
