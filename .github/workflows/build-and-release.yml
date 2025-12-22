@@ -97,7 +97,8 @@ jobs:
           zip -r "${APP_NAME}-${VERSION}.ipa" Payload
           cd ..
           
-          cp composeApp/build/outputs/apk/debug/*.apk "build/${APP_NAME}-${VERSION}.apk"
+          APK_PATH=$(find composeApp/build/outputs/apk/debug -name "*.apk" | head -1)
+          cp "$APK_PATH" "build/${APP_NAME}-${VERSION}.apk"
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
@@ -111,14 +112,15 @@ jobs:
             ## New Build Ready for Testing
             
             ### Android
-            1. Download the `.apk` file below.
+            - Download the `.apk` file below.
             
             ### iOS
-            1. Download the `.ipa` file below.
-            2. Sideload via AltStore or Sideloadly.
+            - Download the `.ipa` file below. (Sideloading required)
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-outputs
-          path: build/*.ipa
+          path: |
+            build/*.ipa
+            build/*.apk
