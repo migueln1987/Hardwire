@@ -55,7 +55,6 @@ fun MetronomeScreen(initialBpm: Int = 120, viewModel: MetronomeViewModel = viewM
 
         Button(
             onClick = {
-                println("UI: Button Clicked!")
                 viewModel.toggleMetronome()
             },
             colors = ButtonDefaults.buttonColors(
