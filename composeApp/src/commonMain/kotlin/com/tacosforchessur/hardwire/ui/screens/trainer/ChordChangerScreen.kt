@@ -4,14 +4,12 @@ package com.tacosforchessur.hardwire.ui.screens.trainer
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tacosforchessur.hardwire.domain.models.Chord
 import com.tacosforchessur.hardwire.domain.repository.ChordLibrary
+import com.tacosforchessur.hardwire.ui.components.AdaptiveScreen
 import com.tacosforchessur.hardwire.ui.components.ChordDiagram
 import com.tacosforchessur.hardwire.viewmodel.ChordChangerViewModel
 import com.tacosforchessur.hardwire.viewmodel.MetronomeViewModel
@@ -42,7 +41,6 @@ fun ChordChangerScreen(
     onNavigateToMetronome: (Int) -> Unit,
     onNavigateToLibrary: () -> Unit,
 ) {
-
     val currentBeat = metronomeVm.currentBeat
     val isTicking by metronomeVm.isTicking.collectAsState()
 
@@ -84,10 +82,8 @@ fun ChordChangerContent(
             )
         }
     ) { innerPadding ->
-        // TODO: Extract outer most BoxWithConstraints into an AdapticeScreen wrapper
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val isTablet = maxWidth > 600.dp
-            if (isTablet) {
+        AdaptiveScreen(
+            tabletView = {
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
@@ -105,7 +101,8 @@ fun ChordChangerContent(
                         Modifier.weight(3f).fillMaxHeight()
                     )
                 }
-            } else {
+            },
+            phoneView = {
                 Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp)) {
                     ChordDisplay(
                         currentBeat = currentBeat,
@@ -118,7 +115,8 @@ fun ChordChangerContent(
                     )
                 }
             }
-        }
+
+        )
     }
 }
 
