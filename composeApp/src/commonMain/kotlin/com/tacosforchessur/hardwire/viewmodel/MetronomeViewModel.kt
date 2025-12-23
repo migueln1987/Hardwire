@@ -25,8 +25,14 @@ class MetronomeViewModel : ViewModel() {
 
     var currentBeat by mutableStateOf(1)
 
+    val bpmOptions = (40..220).toList()
+
+    private val _beatsPerMeasure = MutableStateFlow(4)
+    val beatsPerMeasure = _beatsPerMeasure.asStateFlow()
+
+    val measureOptions = (1..16).toList()
+
     private var internalTickCount = 1
-    var beatsPerMeasure = 4 //TODO: Make this adjustable
 
     init {
         engine.onTick = {
@@ -34,7 +40,7 @@ class MetronomeViewModel : ViewModel() {
             engine.playTick(isAccent)
             currentBeat = internalTickCount
             _tickEvent.tryEmit(internalTickCount)
-            internalTickCount = if (internalTickCount >= beatsPerMeasure) 1 else internalTickCount + 1
+            internalTickCount = if (internalTickCount >= beatsPerMeasure.value) 1 else internalTickCount + 1
         }
     }
 
@@ -51,8 +57,13 @@ class MetronomeViewModel : ViewModel() {
     }
 
     fun updateBpm(newBpm: Int) {
-        _bpm.value = newBpm
+        val clamped = newBpm.coerceIn(40, 220)
+        _bpm.value = clamped
         engine.setBpm(newBpm)
+    }
+
+    fun updateBeatsPerMeasure(newBeats: Int) {
+        _beatsPerMeasure.value = newBeats
     }
 
     override fun onCleared() {

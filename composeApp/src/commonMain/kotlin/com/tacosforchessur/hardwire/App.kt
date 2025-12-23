@@ -56,7 +56,6 @@ fun App() {
                 composable<MetronomeRoute> { backStackEntry ->
                     val route: MetronomeRoute = backStackEntry.toRoute()
                     MetronomeScreen(
-                        initialBpm = route.initialBpm,
                         viewModel = metronomeVm
                     )
                 }
