@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tacosforchessur.hardwire.DarkBackground
 import com.tacosforchessur.hardwire.FretLineGrey
 import com.tacosforchessur.hardwire.StringGold
 import com.tacosforchessur.hardwire.core.FRETS
@@ -73,7 +74,7 @@ fun ChordDiagram(
                     drawFretboard(
                         fretSpacing,
                         chord.baseFret,
-                        StringGold,
+                        FretLineGrey,
                         FretLineGrey
                     )
                     drawInlays(
@@ -129,7 +130,7 @@ fun ChordDiagram(
 }
 
 @Composable
-@Preview
+@Preview(showBackground = true, backgroundColor = 0xFF121212L)
 fun ChordDiagramPreview() {
     Scaffold {
         ChordDiagram()

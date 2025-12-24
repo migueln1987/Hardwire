@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun FingerMarker(
@@ -22,7 +23,7 @@ fun FingerMarker(
     BoxWithConstraints(
         modifier = modifier
             .aspectRatio(1f)
-            .background(Color.Black, shape = CircleShape),
+            .background(Color.Gray, shape = CircleShape),
         contentAlignment = Alignment.Center
     ) {
         val size = if (maxHeight > 0.dp) maxHeight else 30.dp
@@ -40,4 +41,12 @@ fun FingerMarker(
             )
         }
     }
+}
+
+@Composable
+@Preview
+fun FingerMarkerPreview() {
+    FingerMarker(
+        label = "1"
+    )
 }
