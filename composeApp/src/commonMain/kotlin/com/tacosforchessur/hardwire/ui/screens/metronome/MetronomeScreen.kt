@@ -42,6 +42,7 @@ import kotlinx.coroutines.delay
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tacosforchessur.hardwire.ui.components.IntegerSpinner
 import com.tacosforchessur.hardwire.ui.screens.metronome.components.HybridBeatCounter
+import com.tacosforchessur.hardwire.ui.screens.metronome.components.MetronomeControlPanel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,43 +70,17 @@ fun MetronomeScreen(viewModel: MetronomeViewModel = viewModel()) {
             )
 
             Spacer(modifier = Modifier.height(32.dp))
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                IntegerSpinner(
-                    label = "BPM",
-                    value = bpm,
-                    options = viewModel.bpmOptions,
-                    onValueChange = { viewModel.updateBpm(it) },
-                    modifier = Modifier.weight(1f).padding(8.dp)
-                )
-
-                IntegerSpinner(
-                    label = "Beats",
-                    value = viewModel.beatsPerMeasure.value,
-                    options = viewModel.measureOptions,
-                    onValueChange = { viewModel.updateBeatsPerMeasure(it) },
-                    modifier = Modifier.weight(1f).padding(8.dp)
-                )
-            }
-
-            Slider(
-                value = bpm.toFloat(),
-                onValueChange = {
-                    viewModel.updateBpm(bpm)
-                },
-                valueRange = 40f..220f
+            MetronomeControlPanel(
+                bpm = bpm,
+                bpmOptions = viewModel.bpmOptions,
+                measureOptions = viewModel.measureOptions,
+                beatsPerMeasure = beatsPerMeasure,
+                onUpdateBpm = { viewModel.updateBpm(it)},
+                onUpdateBeatsPerMeasure = { viewModel.updateBeatsPerMeasure(it) },
+                onToggleMetronome = { viewModel.toggleMetronome() },
+                isRunning = isRunning,
+                    modifier = Modifier
             )
-
-            Button(
-                onClick = {
-                    viewModel.toggleMetronome()
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isRunning) Color.Red else Color.Green
-                )
-            ) {
-                Text(text = if (isRunning) "Stop" else "Start")
-            }
         }
 
     }

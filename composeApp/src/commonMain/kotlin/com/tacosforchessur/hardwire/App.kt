@@ -29,12 +29,13 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 val DarkBackground = Color(0xFF121212)
 val SurfaceGrey = Color(0xFF2C2C2C)
 val ElectricCyan = Color(0xFF00FFE5)
-val StartGreen = Color(0xFF4CAF50)
+val MaterialGreen = Color(0xFF4CAF50)
+val MaterialRed = Color(0xFFF44336)
 val FretboardWhite = Color(0xFFFFFFFF)
 val FretLineGrey = Color(0xFFE0E0E0)
 val StringGold = Color(0xFFFFD700)
 
-private val DarkColorScheme = darkColorScheme(
+val DarkColorScheme = darkColorScheme(
     primary = ElectricCyan,
     background = DarkBackground,
     surface = SurfaceGrey,
