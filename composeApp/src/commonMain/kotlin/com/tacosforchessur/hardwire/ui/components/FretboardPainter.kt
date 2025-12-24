@@ -7,14 +7,19 @@ import androidx.compose.ui.unit.dp
 import com.tacosforchessur.hardwire.core.FRETS
 import com.tacosforchessur.hardwire.core.STRINGS
 
-fun DrawScope.drawFretboard(fretSpacing: Float, baseFret: Int) {
+fun DrawScope.drawFretboard(
+    fretSpacing: Float,
+    baseFret: Int,
+    lineColor: Color = Color.White,
+    fretColor: Color
+) {
     val columnWidth = size.width / STRINGS
     val halfColumn = columnWidth / 2f
 
     for (i in 0 until STRINGS) {
         val x = (i * columnWidth) + halfColumn
         drawLine(
-            color = Color.Black,
+            color = lineColor,
             start = Offset(x, 0f),
             end = Offset(x, size.height),
             strokeWidth = 1.dp.toPx()
@@ -28,7 +33,7 @@ fun DrawScope.drawFretboard(fretSpacing: Float, baseFret: Int) {
         val isGuitarNut = (i == 0 && baseFret == 1)
         val stroke = if (isGuitarNut) 10f else 2f
         drawLine(
-            color = Color.Black,
+            color = fretColor,
             start = Offset(halfColumn, y),
             end = Offset(lastStringX, y),
             strokeWidth = stroke

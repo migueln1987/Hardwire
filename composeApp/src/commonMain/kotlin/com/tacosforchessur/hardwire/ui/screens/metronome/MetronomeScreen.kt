@@ -16,10 +16,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,57 +41,73 @@ import com.tacosforchessur.hardwire.viewmodel.MetronomeViewModel
 import kotlinx.coroutines.delay
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tacosforchessur.hardwire.ui.components.IntegerSpinner
+import com.tacosforchessur.hardwire.ui.screens.metronome.components.HybridBeatCounter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MetronomeScreen(viewModel: MetronomeViewModel = viewModel()) {
     val bpm by viewModel.bpm.collectAsStateWithLifecycle()
     val isRunning by viewModel.isTicking.collectAsStateWithLifecycle()
+    val beatsPerMeasure by viewModel.beatsPerMeasure.collectAsStateWithLifecycle()
+    val currentBeat = viewModel.currentBeat
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        MetronomeVisualizer(viewModel)
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            IntegerSpinner(
-                label = "BPM",
-                value = bpm,
-                options = viewModel.bpmOptions,
-                onValueChange = { viewModel.updateBpm(it) },
-                modifier = Modifier.weight(1f).padding(8.dp)
-            )
-
-            IntegerSpinner(
-                label = "Beats",
-                value = viewModel.beatsPerMeasure.value,
-                options = viewModel.measureOptions,
-                onValueChange = { viewModel.updateBeatsPerMeasure(it) },
-                modifier = Modifier.weight(1f).padding(8.dp)
-            )
-        }
-
-        Slider(
-            value = bpm.toFloat(),
-            onValueChange = {
-                viewModel.updateBpm(bpm)
-            },
-            valueRange = 40f..220f
+    Scaffold(
+        topBar = {
+        TopAppBar(
+            title = { Text(text = "Metronome") },
         )
-
-        Button(
-            onClick = {
-                viewModel.toggleMetronome()
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (isRunning) Color.Red else Color.Green
-            )
+    }) { innerPadding ->
+        Column(
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = if (isRunning) "Stop" else "Start")
+
+            HybridBeatCounter(
+                currentBeat = currentBeat,
+                totalBeats = beatsPerMeasure,
+                isRunning = isRunning
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                IntegerSpinner(
+                    label = "BPM",
+                    value = bpm,
+                    options = viewModel.bpmOptions,
+                    onValueChange = { viewModel.updateBpm(it) },
+                    modifier = Modifier.weight(1f).padding(8.dp)
+                )
+
+                IntegerSpinner(
+                    label = "Beats",
+                    value = viewModel.beatsPerMeasure.value,
+                    options = viewModel.measureOptions,
+                    onValueChange = { viewModel.updateBeatsPerMeasure(it) },
+                    modifier = Modifier.weight(1f).padding(8.dp)
+                )
+            }
+
+            Slider(
+                value = bpm.toFloat(),
+                onValueChange = {
+                    viewModel.updateBpm(bpm)
+                },
+                valueRange = 40f..220f
+            )
+
+            Button(
+                onClick = {
+                    viewModel.toggleMetronome()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isRunning) Color.Red else Color.Green
+                )
+            ) {
+                Text(text = if (isRunning) "Stop" else "Start")
+            }
         }
+
     }
 }
 

@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -24,6 +26,22 @@ import com.tacosforchessur.hardwire.viewmodel.ChordChangerViewModel
 import com.tacosforchessur.hardwire.viewmodel.MetronomeViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+val DarkBackground = Color(0xFF121212)
+val SurfaceGrey = Color(0xFF2C2C2C)
+val ElectricCyan = Color(0xFF00FFE5)
+val StartGreen = Color(0xFF4CAF50)
+val FretboardWhite = Color(0xFFFFFFFF)
+val FretLineGrey = Color(0xFFE0E0E0)
+val StringGold = Color(0xFFFFD700)
+
+private val DarkColorScheme = darkColorScheme(
+    primary = ElectricCyan,
+    background = DarkBackground,
+    surface = SurfaceGrey,
+    onBackground = Color.White,
+    onSurface = Color.White
+)
+
 @Composable
 @Preview
 fun App() {
@@ -36,7 +54,7 @@ fun App() {
         Logger.i("Device detected: $info")
     }
 
-    MaterialTheme {
+    MaterialTheme(colorScheme = DarkColorScheme) {
         val navController = rememberNavController()
         Box(modifier = Modifier.fillMaxSize()) {
             NavHost(

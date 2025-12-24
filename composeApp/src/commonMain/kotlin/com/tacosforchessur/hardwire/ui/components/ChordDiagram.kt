@@ -22,6 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tacosforchessur.hardwire.FretLineGrey
+import com.tacosforchessur.hardwire.StringGold
 import com.tacosforchessur.hardwire.core.FRETS
 import com.tacosforchessur.hardwire.core.STRINGS
 import com.tacosforchessur.hardwire.domain.models.Chord
@@ -68,7 +70,12 @@ fun ChordDiagram(
                     val fretSpacing = size.height / FRETS
                     val fretBoardCenter = size.width / 2f
                     val columnWith = size.width / STRINGS
-                    drawFretboard(fretSpacing, chord.baseFret)
+                    drawFretboard(
+                        fretSpacing,
+                        chord.baseFret,
+                        StringGold,
+                        FretLineGrey
+                    )
                     drawInlays(
                         inlays = inlays,
                         baseFret = chord.baseFret,
